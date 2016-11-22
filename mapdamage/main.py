@@ -1,14 +1,5 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
-from __future__ import print_function
-
-import logging
-import random
-import time
-import sys
-import os
-
 """ Copyright (c) 2012  Aurélien Ginolhac, Mikkel Schubert, Hákon Jónsson
 and Ludovic Orlando
 
@@ -26,8 +17,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 OR OTHER DEALINGS IN THE SOFTWARE.
 
 plot and quantify damage patterns from a SAM/BAM file
@@ -37,22 +28,26 @@ plot and quantify damage patterns from a SAM/BAM file
 :Date: November 2012
 :Type: tool
 :Input: SAM/BAM
-:Output: tabulated tables, pdf 
+:Output: tabulated tables, pdf
 """
+from __future__ import print_function
 
-# check if pysam if available
-MODULE = "pysam"
-URL = "http://code.google.com/p/pysam/"
-try:
-    __import__(MODULE)
-except ImportError, e:
-    sys.stderr.write("Error: Could not import required module '%s':\n\t- %s\n" % (MODULE, e))
-    sys.stderr.write("       If module is not installed, please download from '%s'.\n" % URL)
-    sys.stderr.write("       A local install may be performed using the following command:\n")
-    sys.stderr.write("       $ python setup.py install --user\n\n")
-    sys.exit(1)
+import logging
+import random
+import time
+import sys
+import os
 
 import pysam
+
+import mapdamage
+import mapdamage.align
+import mapdamage.composition
+import mapdamage.parseoptions
+import mapdamage.rescale
+import mapdamage.rscript
+import mapdamage.seq
+import mapdamage.tables
 
 
 _BAM_UNMAPPED  = 0x4
@@ -114,42 +109,9 @@ def _read_bamfile(bamfile, options):
     else:
         return _downsample_to_fixed_number(bamfile, options)
 
-def _check_mm_option():
-    """
-    As the user can override the system wide mapdamage modules with 
-    the --mapdamage-modules, it has to happen before option parsing 
-    in mapdamage.parseoptions
-    """
-    path_to_mm = None
-    for nr,arg in zip(xrange(len(sys.argv)),sys.argv):
-        if arg.startswith("--mapdamage-modules"):
-            try:
-                if "=" in arg:
-                    # the option is of the format --mapdamage-modules=AAAA
-                    arg_p = arg.split("=")
-                    path_to_mm = arg_p[1]
-                else:
-                    # the option is of the format --mapdamage-modules AAAA
-                    path_to_mm = sys.argv[nr+1] 
-                break
-            except IndexError as e:
-                raise SystemExit("Must specify a path to --mapdamage-modules")
-    if path_to_mm != None:
-        if not os.path.isdir(path_to_mm):
-            raise SystemExit("The --mapdamage-modules option must be a valid path (path=%s)" % path_to_mm)
-        if not os.path.isdir(os.path.join(path_to_mm,"mapdamage")):
-            raise SystemExit("The --mapdamage-modules path (path=%s) must contain the mapdamage module" % path_to_mm)
-    return path_to_mm
-
 
 def main():
     start_time = time.time()
-
-    # the user can override the system wide mapdamage modules
-    path_to_mm = _check_mm_option()
-    if path_to_mm != None:
-        sys.path.insert(0,path_to_mm)
-    import mapdamage
 
     options = mapdamage.parseoptions.options()
     if options == None:

@@ -1,10 +1,4 @@
 #!/usr/bin/env python
 
-import mapdamage.parseoptions
-import mapdamage.seq
-import mapdamage.align
-import mapdamage.tables
-import mapdamage.composition
-import mapdamage.rscript
-import mapdamage.rescale
-import mapdamage.version
+__version_info__ = (2, 1, 0)
+__version__ = '%i.%i.%i' % __version_info__

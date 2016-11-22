@@ -1,12 +1,15 @@
 import csv
-import sys
-import os
-import mapdamage
-import pysam
 import itertools
-import math
 import logging
+import math
+import os
+import sys
 import time
+
+import pysam
+
+import mapdamage.align
+import mapdamage.seq
 
 
 def phred_pval_to_char(pval):

@@ -3,8 +3,9 @@
 import os
 import collections
 
-import mapdamage
-from mapdamage.version import __version__
+import mapdamage.seq
+
+from mapdamage import __version__
 
 
 def initialize_mut(ref, length):  

@@ -3,7 +3,7 @@
 import os
 import subprocess
 from subprocess import CalledProcessError, check_call
-from mapdamage.version import __version__
+from mapdamage import __version__
 import mapdamage
 import logging
 import time

@@ -2,10 +2,11 @@
 
 import mapdamage
 import itertools
-import subprocess
 import sys
 
+import mapdamage.seq
 import mapdamage.seqtk
+
 
 def count_ref_comp(read, chrom, before, after, comp):
   """ record basae composition in external genomic regions """
