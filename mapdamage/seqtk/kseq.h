@@ -135,7 +135,7 @@ typedef struct __kstring_t {
 			str->s = (char*)calloc(1, 1);								\
 		} else if (delimiter == KS_SEP_LINE && str->l > 1 && str->s[str->l-1] == '\r') --str->l; \
 		str->s[str->l] = '\0';											\
-		return str->l;													\
+		return (int)str->l;													\
 	} \
 	static inline int ks_getuntil(kstream_t *ks, int delimiter, kstring_t *str, int *dret) \
 	{ return ks_getuntil2(ks, delimiter, str, dret, 0); }
@@ -197,7 +197,7 @@ typedef struct __kstring_t {
 			seq->seq.s = (char*)realloc(seq->seq.s, seq->seq.m); \
 		} \
 		seq->seq.s[seq->seq.l] = 0;	/* null terminated string */ \
-		if (c != '+') return seq->seq.l; /* FASTA */ \
+		if (c != '+') return (int)seq->seq.l; /* FASTA */ \
 		if (seq->qual.m < seq->seq.m) {	/* allocate memory for qual in case insufficient */ \
 			seq->qual.m = seq->seq.m; \
 			seq->qual.s = (char*)realloc(seq->qual.s, seq->qual.m); \
@@ -206,8 +206,8 @@ typedef struct __kstring_t {
 		if (c == -1) return -2; /* error: no quality string */ \
 		while (ks_getuntil2(ks, KS_SEP_LINE, &seq->qual, 0, 1) >= 0 && seq->qual.l < seq->seq.l); \
 		seq->last_char = 0;	/* we have not come to the next header line */ \
-		if (seq->seq.l != seq->qual.l) return -2; /* error: qual string is of a different length */ \
-		return seq->seq.l; \
+		if (seq->seq.l != seq->qual.l) return -3; /* error: qual string is of a different length */ \
+		return (int)seq->seq.l; \
 	}
 
 #define __KSEQ_TYPE(type_t)						\

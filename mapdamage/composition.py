@@ -2,9 +2,10 @@
 
 import mapdamage
 import itertools
-import csv
 import subprocess
 import sys
+
+import mapdamage.seqtk
 
 def count_ref_comp(read, chrom, before, after, comp):
   """ record basae composition in external genomic regions """
@@ -35,21 +36,22 @@ def get_base_comp(filename,destination=False):
     Gets the basecomposition of all the sequences in filename
     and returns the value to destination if given.
     """
-    path_to_seqtk = mapdamage.rscript.construct_path("seqtk",folder="seqtk") 
-    bases = {"A":0,"C":0,"G":0,"T":0}
-    alp = ["A","C","G","T"]
     try:
-        proc = subprocess.Popen([path_to_seqtk,"comp",filename],stdout=subprocess.PIPE)
-        out = proc.communicate()[0]
-        for li in out.splitlines():
-            tabs = li.split() # 1 is the ref, 2 is the total and then the base counts A, C, G and T.
-            bases["A"] = bases["A"] + int(tabs[2])
-            bases["C"] = bases["C"] + int(tabs[3])
-            bases["G"] = bases["G"] + int(tabs[4])
-            bases["T"] = bases["T"] + int(tabs[5])
-    except (OSError, ValueError), error:
+        out = mapdamage.seqtk.comp(filename)
+    except (OSError, mapdamage.seqtk.error), error:
         sys.stderr.write("Error: Seqtk failed: %s\n" % (error,))
         sys.exit(1)
+
+    bases = {"A":0,"C":0,"G":0,"T":0}
+    alp = ["A","C","G","T"]
+
+    for li in out.splitlines():
+        tabs = li.split() # 1 is the ref, 2 is the total and then the base counts A, C, G and T.
+        bases["A"] = bases["A"] + int(tabs[2])
+        bases["C"] = bases["C"] + int(tabs[3])
+        bases["G"] = bases["G"] + int(tabs[4])
+        bases["T"] = bases["T"] + int(tabs[5])
+
     # get the base frequencies
     ba_su = sum(bases.values())
     for ba in alp:
